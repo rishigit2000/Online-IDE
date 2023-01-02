@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
+    </link>
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/theme/monokai.min.css">
+    <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js">
+    </script>
+    <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/xml/xml.js">
+    </script>
+    <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/javascript/javascript.js">
+    </script>
+    <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/css/css.js">
+    </script>
+    <script type="text/javascript" src="/codemirror/parsexml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/addon/hint/show-hint.min.css"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/addon/hint/show-hint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/addon/hint/xml-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/addon/hint/html-hint.min.js"></script>
+
+    <!-- <script src="/script.js"></script> -->
+    <title>IIITH Docs</title>
+</head>
+<body>
+    <div class="docs" style="width: 48%; float: left; padding-left: 10px;">
+        <h1>Docs</h1>
+        <textarea id="docs" >
+        </textarea>
+    </div>
+    <div class="Output zone" style="width: 50%;float: right;">
+    <h1>Output <button onclick="compileHTML()" style="background-color: #3149b3; /* Green */
+        border: none;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;border-radius: 25%;">Run</button>  </h1>
+    
+    <!-- <div id = "output"></div> -->
+    <iframe src="/final.html" id="frame" style="width: 100%; height: 750px;"></iframe>
+    <script>
+        function compileHTML(field,e){
+            document.getElementById('frame').contentWindow.document.getElementById('output').innerHTML =editor.getValue() ; 
+            // document.getElementById('output').innerHTML = editor.getValue();
+        }
+        var editor = CodeMirror.fromTextArea(document.getElementById("docs"),{
+            lineNumbers: true,
+            mode:"text/html",
+            theme: "monokai",
+            extraKeys: {"Ctrl-Space": "autocomplete"}
+        });
+        editor.setSize(null, 800);
+
+        var orig = CodeMirror.hint.HTML;
+        CodeMirror.hint.HTML = function(cm) {
+        var inner = orig(cm) || {from: cm.getCursor(), to: cm.getCursor(), list: []};
+        inner.list.push("");
+        return inner;
+        };
+
+
+        $(document).ready(function () {
+            function get_current_line_num() {
+                const t = $("#docs")[0];
+                // return t.value.substr(0, t.selectionStart).split("\n").length;
+                return editor.getCursor().line+1;
+            }
+            
+            $("#docs").load("/docs_reader",function(){
+            editor.setValue(decodeURI($("#docs")[0].value));
+            // console.log("Editor code:",editor.getValue());
+            });
+            CodeMirror.commands.autocomplete = function(cm) {
+                CodeMirror.showHint(cm, CodeMirror.hint.html); // Error Here
+            }
+            // editor.on("keyup",compileHTML);
+            // $("textarea#docs").on("keyup keypress keydown change", function () {
+            editor.on("blur", function() {
+                const line_num = get_current_line_num();
+
+                const textarea = $(this);
+                const text = editor.getValue().split("\n");
+                if (text.length < line_num) {
+                    return;
+                }
+                let text_line = text[line_num - 1];
+                text_line = text_line.replaceAll(" ", "+");
+
+                if (text_line.trim().length == 0) {
+                    return;
+                }
+                console.log(text_line);
+                const url = "/docs_writer?line_num=" + line_num + "&content=" + text_line;
+                $.get(url, (data, status) => {
+                    if (status == "success") {
+                        textarea.val(decodeURI(data));
+                        
+                        editor.setValue(decodeURI(data));
+                    }
+                });
+            });
+        });
+    </script>
+    </div>
+</body>
+</html>

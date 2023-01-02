@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reader & Writer</title>
+</head>
+<body>
+    <div class="reader" style="display:inline-block; float: left; padding-left: 20px;">
+        <h1>Reader</h1>
+        <form action="/reader" method="get">
+            <label for="line_num">Line Number</label>
+            <input type="text" id="line_num" name="line_num" maxlength="2" size="4"><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <div class="writer" style="display: inline-block; float: right; padding-right: 20px;">
+        <h1> Writer </h1>
+        <form action="/writer" method="get">
+            <label for="line_num">Line Number</label>
+            <input type="text" id="line_num" name="line_num" maxlength="2" size="4"><br><br>
+            <label for="content">Line Content</label>
+            <input type="text" id="content" name="content" style="height: 25px; width: 400px;"><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>
